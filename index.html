@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Technical Architecture: AI Campaign Health Intelligence</title>
+<style>
+  :root {
+    --sidebar: #162251;
+    --bg: #f0f4f8;
+    --paper: #ffffff;
+    --border: #e8edf5;
+    --text: #1a1f36;
+    --text-secondary: #6b7c93;
+    --accent: #0070d2;
+    --ai-teal: #00b9a9;
+    --green: #1aab68;
+    --red: #d13438;
+    --amber: #d97706;
+    --code-bg: #f6f8fb;
+    --shadow: 0 1px 4px rgba(26, 40, 96, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+  aside.toc {
+    background: var(--sidebar);
+    color: #fff;
+    padding: 32px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  aside.toc .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  aside.toc .ai-icon {
+    color: var(--ai-teal);
+    font-size: 18px;
+  }
+  aside.toc .meta {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+  aside.toc h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 24px 0 8px;
+    font-weight: 600;
+  }
+  aside.toc a {
+    display: block;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    padding: 6px 0;
+    font-size: 13px;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -10px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  aside.toc a:hover {
+    color: #fff;
+    border-left-color: var(--ai-teal);
+  }
+  aside.toc a.sub {
+    padding-left: 22px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  main {
+    padding: 48px 56px 96px;
+    max-width: 980px;
+  }
+  header.title-block {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.title-block .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, rgba(0, 185, 169, 0.12), rgba(0, 112, 210, 0.10));
+    color: var(--ai-teal);
+    border: 1px solid rgba(0, 185, 169, 0.24);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  header.title-block h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  header.title-block .subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  h1, h2, h3, h4 { color: var(--text); font-weight: 600; }
+  h2 {
+    font-size: 22px;
+    margin: 48px 0 16px;
+    padding-top: 16px;
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-size: 17px;
+    margin: 28px 0 10px;
+  }
+  h4 {
+    font-size: 14px;
+    margin: 20px 0 8px;
+  }
+  p { margin: 0 0 14px; }
+  strong { color: var(--text); font-weight: 600; }
+  em { color: var(--text); font-style: italic; }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  ul, ol {
+    margin: 0 0 16px;
+    padding-left: 22px;
+  }
+  li { margin-bottom: 6px; }
+  code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  pre {
+    background: #0d1530;
+    color: #e8edf5;
+    padding: 20px 24px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    margin: 16px 0 24px;
+  }
+  pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0 24px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+    box-shadow: var(--shadow);
+  }
+  thead th {
+    background: #f7faff;
+    color: var(--text);
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(0, 112, 210, 0.025); }
+  blockquote {
+    margin: 16px 0;
+    padding: 14px 20px;
+    background: rgba(0, 185, 169, 0.06);
+    border-left: 3px solid var(--ai-teal);
+    border-radius: 4px;
+    color: var(--text);
+  }
+  .callout {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0 24px;
+    box-shadow: var(--shadow);
+  }
+  .callout.warn { border-left-color: var(--amber); }
+  .callout.warn::before {
+    content: "⚠ Caveat";
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--amber);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .gap-high { color: var(--red); font-weight: 600; }
+  .gap-med { color: var(--amber); font-weight: 600; }
+  .gap-low { color: var(--green); font-weight: 600; }
+  .footer-meta {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside.toc { position: static; height: auto; }
+    main { padding: 32px 24px 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc">
+    <div class="brand"><span class="ai-icon">✦</span> Campaign Audit · Architecture</div>
+    <div class="meta">
+      Source: PRD (Stephen Yu) + Vision Prototype<br>
+      Audience: Eng + AI Science + PM<br>
+      Status: Pre-shareout draft
+    </div>
+    <h4>Sections</h4>
+    <a href="#context">Context</a>
+    <a href="#skills">1. Skills</a>
+    <a href="#dim-skills" class="sub">10 Audit-Dimension skills</a>
+    <a href="#comp-skills" class="sub">3 Composition skills</a>
+    <a href="#action-skills" class="sub">Action-Execution skills</a>
+    <a href="#existing-skills" class="sub">Reusable existing skills</a>
+    <a href="#tools">2. Tools / APIs / Data</a>
+    <a href="#data-plane" class="sub">Mailchimp data-plane</a>
+    <a href="#customer-context-tools" class="sub">Customer context</a>
+    <a href="#alf" class="sub">ALF labels</a>
+    <a href="#deeplinks" class="sub">Deep-link tools</a>
+    <a href="#gap-heatmap" class="sub">Gap heat-map</a>
+    <a href="#context">3. Context</a>
+    <a href="#new-context-types" class="sub">New context types</a>
+    <a href="#composition" class="sub">Composition patterns</a>
+    <a href="#governance" class="sub">Governance</a>
+    <a href="#diagram">Architecture diagram</a>
+    <a href="#verification">Verification</a>
+    <a href="#open-questions">Open questions</a>
+    <a href="#summary">Summary</a>
+  </aside>
+
+  <main>
+    <header class="title-block">
+      <span class="pill">✦ AI Campaign Health Intelligence</span>
+      <h1>Technical Architecture</h1>
+      <p class="subtitle">Net-new skills, tools/APIs, and runtime context patterns required to build the audit on top of Mailchimp's Analytics Agent infrastructure.</p>
+    </header>
+
+    <p><strong>Source material:</strong> PRD (<code>PRD: MC AI Campaign Health Intelligence</code>, Stephen Yu) + Vision Prototype (<code>campaign-audit/Design Bench.html</code>).</p>
+    <p><strong>Audience:</strong> Eng + AI Science + PM, ahead of leadership shareout.</p>
+    <p><strong>Status:</strong> Research/architecture deliverable. No code changes proposed in this document — it is the answer to the three questions:</p>
+    <ol>
+      <li>What net-new <strong>skills</strong> are required, what problem each solves, and why it matters.</li>
+      <li>What additional <strong>tools / APIs / data</strong> (ALF labels, segmentation data, etc.) are needed.</li>
+      <li>Whether we need new <strong>context</strong> beyond what we have today, or whether retrieval/composition needs to change at runtime.</li>
+    </ol>
+
+    <div class="callout warn">
+      This document is derived from the PRD, the prototype's UI contract, and reasoned inference from Mailchimp's existing Analytics Agent architecture. The local workspace does <strong>not</strong> contain the production Analytics Agent codebase — only adjacent prototypes (Klav-Intel, Hub-Intel, CI-Agent, the static analytics-ai prototype). Where I cite an existing system (BigQuery, StarRocks, MTA, ALF, MCDS, Customer Journey Builder), I am inferring it exists from the PRD's "Reuses Analytics Agent retrieval/eval infra" line and team common knowledge — <strong>eng owners must validate before commitment</strong>. Items marked <strong>[from PRD]</strong> or <strong>[from prototype]</strong> are certain. Items marked <strong>[inferred — verify]</strong> need confirmation.
+    </div>
+
+    <hr>
+
+    <h2 id="context-section">Context</h2>
+
+    <h3>What the prototype commits to producing</h3>
+    <p>A campaign-detail surface inside the Mailchimp app shell that renders, in one screen:</p>
+    <ul>
+      <li>An overall <strong>A−C grade</strong> with a one-line verdict and status counts (Strong / Moderate / Needs attention / No data).</li>
+      <li><strong>10 dimension findings</strong>, each with a status pill, a customer-language question, and a one-line headline finding.</li>
+      <li><strong>5 (target: 5–7) ranked actions</strong> with Effort × Impact × Time-to-Results chips, linked dimension, and an in-product CTA (e.g., "Save as template," "Build segment") that deep-links into Mailchimp.</li>
+      <li>A <strong>"How this was generated"</strong> tab with: data sources audited, explicit gaps that were <em>not</em> audited, dimension weights (with a compliance floor), and a methodology + disclaimer.</li>
+    </ul>
+
+    <h3>Why this matters for architecture</h3>
+    <p>Each prototype element is a runtime contract on the agent. Per-dimension grades require per-dimension evidence retrieval. Action chips require Effort/Impact/Time scoring per recommendation. Deep-link CTAs require structured action payloads with target surface + prefilled state. The "What we couldn't audit" panel requires explicit data-availability flags propagated end-to-end. <strong>These are not free.</strong></p>
+
+    <h3>What the PRD commits to</h3>
+    <p>Quality-over-latency in V1; deterministic evidence-backed scorecards; abstain-when-unsure; root-cause diagnosis on Moderate/Needs Attention; omnichannel by default (email + SMS + automation); CSM/AM Briefing surface first, then in-product self-serve; "Take this action" deep-links in V1, "Do this for me" approval-first execution in V1.5 (cross-team dependency).</p>
+
+    <h3>The architecture choice that flows from this</h3>
+    <p>A <strong>planner-orchestrator agent</strong> that decomposes "audit this campaign / portfolio" into ~10 parallel dimension subtasks; each subtask is a deterministic skill calling typed tools against Mailchimp's data plane; results are aggregated into a structured <code>AuditReport</code> with confidence flags; a separate Action Synthesis skill consumes all dimension findings and emits ranked, deep-linked actions. Consistent with the PRD's "Reuses Analytics Agent retrieval/eval infra" line and with the Bedrock/MCP tool-use model.</p>
+
+    <hr>
+
+    <h2 id="skills">1. Skills (the new units of agent behavior)</h2>
+
+    <p>A "skill" here = a goal-bounded unit that the planner can invoke; internally it calls one or more typed tools and returns a typed output. Skills are the right granularity for the audit because each dimension has a distinct retrieval pattern, distinct evaluation logic, and distinct failure modes.</p>
+
+    <p><strong>Layered model.</strong> Three tiers of skill:</p>
+    <ul>
+      <li><strong>Audit-Dimension skills (10)</strong> — each grades one dimension, returns <code>{grade, finding, evidence[], rootCause?, dataAvailability}</code>.</li>
+      <li><strong>Audit-Composition skills (3)</strong> — orchestration, aggregation, action synthesis; consume dimension outputs.</li>
+      <li><strong>Action-Execution skills (V1 vs V1.5)</strong> — V1 deep-links; V1.5 constructs Mailchimp changes for approval. Cross-team-dependent.</li>
+    </ul>
+
+    <h3 id="dim-skills">1.1 Audit-Dimension skills (10) — net new</h3>
+    <p>Naming follows the <strong>prototype's</strong> customer-language labels (the prototype's framing is more decisive than the PRD's; the PRD should adopt these). Mapped to PRD dimensions in parentheses.</p>
+
+    <table>
+      <thead>
+        <tr><th style="width:32px;">#</th><th>Skill name</th><th>Solves the customer problem</th><th>Why it matters (architectural rationale)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>IntentOutcomeFitSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Goal Clarity</span></td><td>"Was this campaign tied to a clear business goal, and did it earn the right outcome?"</td><td>Requires reading subject + content + CTA + result; no single metric encodes intent. Needs an LLM-based content-vs-result classifier. Non-trivial because "intent" must be inferred from creative + audience + send context.</td></tr>
+        <tr><td>2</td><td><code>AudienceSegmentationSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Audience, Segmentation & Personalization</span></td><td>"Did the right people get this campaign? What unused segment would lift the next one?"</td><td>Powers prototype Action #2 ("past-purchaser variant → 3.2× lift"). Requires segment-vs-full-list lift comparisons + counterfactual reasoning. The "unused-segment-with-quantified-delta" logic is the most differentiated insight in the prototype.</td></tr>
+        <tr><td>3</td><td><code>OfferValuePropSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Offer & Value Proposition</span></td><td>"What patterns in my own subject lines and offers are working vs. quietly failing?"</td><td>Needs subject-line clustering across the customer's <em>own</em> history + winners-vs-losers attribution. Requires an embedding pass over the customer's campaign corpus, not just a single-campaign read. Cross-campaign retrieval is novel for this audit.</td></tr>
+        <tr><td>4</td><td><code>CreativeRenderSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Creative, Content & Render Reality</span></td><td>"Did the email look good and render correctly across clients/dark mode?"</td><td><strong>Held P2 in PRD; prototype shows it as <code>No data</code> — this is correct.</strong> Skill stub must exist now to surface the data-gap honestly; full implementation gates on Q4 render-test data.</td></tr>
+        <tr><td>5</td><td><code>TimingCadenceSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Timing & Cadence</span></td><td>"What's <em>my</em> best send day/time, and is cadence sustainable?"</td><td>Per-customer time-of-send analysis, fatigue detection (frequency vs. unsub-trend correlation), automation/broadcast overlap detection. Computational pattern: time-window aggregation + simple correlation.</td></tr>
+        <tr><td>6</td><td><code>CrossChannelCoherenceSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Cross-Channel Coherence</span></td><td>"Are my channels working together or stepping on each other? Which channel earns most per send?"</td><td>The omnichannel claim. Requires email + SMS + automation join in a single feature space + revenue-per-send normalization. <span class="gap-high">Open question in the PRD — confirm SMS + automation data accessibility (AI Science + Eng owner).</span></td></tr>
+        <tr><td>7</td><td><code>DeliverabilityListHealthSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Deliverability, List Health & Anomaly Visibility</span></td><td>"Are my emails landing? Is my list growing or churning, and why?"</td><td>Needs ISP-level placement signals + bounce/complaint ratios + list growth/decay narrative + anomaly detection. Requires deliverability/MTA data plane access.</td></tr>
+        <tr><td>8</td><td><code>ConversionPathSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Conversion Path Coherence</span></td><td>"I have decent opens but clicks aren't converting. Diagnose it."</td><td>Funnel diagnostics: open → click → site → cart → order. Diagnostic chain on weak click rates: landing-page mismatch, CTA strength, link density, broken automation triggers. <strong>Most attacker-able dimension</strong> — wrong root cause = trust loss. Requires explicit "I cannot confidently diagnose" abstain path.</td></tr>
+        <tr><td>9</td><td><code>ComplianceCustomerVoiceSkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Compliance & Customer Voice</span></td><td>"Show me what customers are saying when they leave. Am I compliant and accessible?"</td><td>Headline content is <em>unsubscribe-reason themes with verbatim quotes</em>. Requires NLP clustering over unsub free-text + compliance posture check + accessibility audit. The customer-voice clustering is <strong>net-new tooling</strong>.</td></tr>
+        <tr><td>10</td><td><code>PerformanceRealitySkill</code><br><span style="color:var(--text-secondary); font-size:11px;">PRD: Funnel Health (renamed)</span></td><td>"Did this campaign drive incremental, profitable revenue? Where's the funnel leak?"</td><td>Revenue-per-send + concentration risk + funnel-stage leakage + repeatable-pattern detection across top performers. Where COGS/incrementality data exists, surfaces ROAS/profit-per-send; where not, abstains. <strong>PRD should adopt the prototype's name.</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h4>Why "skills" not "prompts"</h4>
+    <ol>
+      <li><strong>Eval granularity.</strong> The PRD's eval harness scores dimension accuracy, hallucination rate, ROI calibration, and consistency <em>per dimension</em>. That requires per-dimension evaluable units with typed inputs/outputs. A monolithic "audit prompt" isn't evaluable at the dimension level.</li>
+      <li><strong>Failure isolation.</strong> If the SMS data plane is down, <code>CrossChannelCoherenceSkill</code> should return <code>dataAvailability: partial</code> and the audit continues; the other 9 dimensions shouldn't be poisoned. Skill-level isolation makes this clean. A monolithic prompt cascades failures.</li>
+    </ol>
+
+    <h4>Why "abstain" is a first-class skill behavior</h4>
+    <p>The prototype renders <code>No data</code> as a status pill alongside Strong/Moderate/Needs Attention. That's only credible if every skill emits <code>dataAvailability: {full | partial | none}</code> and the skill <em>refuses to grade</em> when retrieval falls below a confidence threshold. This is not a UI veneer; it's a contract every skill must implement. The PRD calls this out explicitly ("the agent appropriately abstained from scoring on dimensions with partial or missing data, marking them transparently rather than hallucinating").</p>
+
+    <h3 id="comp-skills">1.2 Audit-Composition skills (3) — net new</h3>
+    <table>
+      <thead>
+        <tr><th>Skill</th><th>Solves</th><th>Why it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>AuditPlannerSkill</code></td><td>Decomposes the user/CSM ask ("audit this campaign" / "audit last 90 days") into a per-dimension execution plan, choosing weight + depth based on context (single campaign vs portfolio).</td><td>The PRD's "audit flexes to the unit of analysis" requires a planner that selects scope, time window, and per-dimension depth. Without this, every audit is the same.</td></tr>
+        <tr><td><code>OverallGradeAggregatorSkill</code></td><td>Rolls up 10 dimension grades into the A−C overall + one-line verdict + status counts.</td><td>The prototype's "How this was calculated" tab commits to specific weights (Performance + Deliverability = 30%, Audience + Conversion + Cross-Channel = 30%, Offer + Creative + Timing = 25%, Intent–Outcome = 10%, Compliance = 5% with a floor). <strong>Must be code, not LLM prompt, for determinism.</strong> The "compliance floor" specifically requires deterministic rule logic — an LLM rolling this up is a hallucination vector.</td></tr>
+        <tr><td><code>ActionSynthesizerSkill</code></td><td>Reads all 10 dimension findings + customer context, emits 5–7 ranked actions with Effort × Impact × Time-to-Results chips, ROI directional language, target Mailchimp surface, and prefilled deep-link payload.</td><td>The <strong>highest-leverage skill in the system.</strong> The audit's value depends on actions. Must (a) deduplicate across dimensions, (b) prioritize by leverage not by which dimension found it, (c) generate executable Mailchimp steps not generic advice, (d) emit a deep-link payload the UI can route. Most attacker-able for hallucinated ROI — <strong>gate quantitative ROI behind calibration evidence</strong>.</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Architectural pattern.</strong> Planner runs first → fans out to 10 dimension skills in parallel → results stream into the Aggregator (deterministic rule code) → results + customer context feed the Action Synthesizer (LLM with structured output) → final <code>AuditReport</code> is rendered.</p>
+
+    <h3 id="action-skills">1.3 Action-Execution skills — phased</h3>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Skill</th><th>What it does</th><th>Dependency</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>V1</td><td><code>DeepLinkActionSkill</code></td><td>Resolves an action payload (e.g., "build past-purchaser segment") into a Mailchimp URL with prefilled state.</td><td>Mailchimp surface URLs + prefill query-param contracts. <strong>Verify:</strong> Segment Builder, Customer Journey Builder, Inbox Preview, Suppression Rules, Template Editor all support prefill via URL or state hand-off.</td></tr>
+        <tr><td>V1.5</td><td><code>SegmentBuilderActionSkill</code></td><td>Constructs a segment definition, queues for customer approval, applies on approve.</td><td>Mailchimp Segment Builder API write-access + approval workflow. <strong>Cross-team dependency in PRD.</strong></td></tr>
+        <tr><td>V1.5</td><td><code>SuppressionRuleActionSkill</code></td><td>Constructs a suppression rule (frequency cap, geo, etc.), queues for approval.</td><td>Suppression API write-access.</td></tr>
+        <tr><td>V1.5</td><td><code>ABVariantActionSkill</code></td><td>Drafts an A/B variant (e.g., subject line test), queues.</td><td>A/B testing API + creative gen.</td></tr>
+        <tr><td>V1.5</td><td><code>JourneyEditActionSkill</code></td><td>Drafts a Customer Journey Builder change.</td><td>CJB API write-access + approval.</td></tr>
+        <tr><td>V2</td><td><code>AutoExecuteSkill</code></td><td>Acts within customer-defined guardrails.</td><td>RAI policies + customer-trust signals.</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Why phased.</strong> PRD explicitly sequences this. V1 ships standalone. V1.5+ is gated on broader Mailchimp agent infrastructure that this team doesn't own.</p>
+
+    <h3 id="existing-skills">1.4 Skills the agent already has and can reuse (assumed — verify)</h3>
+    <p><strong>[Inferred — verify with AI Science]</strong></p>
+    <ul>
+      <li><code>AnalyticsAgentRetrievalSkill</code> — campaign / audience / automation read access via the existing Analytics Agent's data plane. The PRD says "Delivered on Analytics Agent infrastructure," which implies a retrieval layer already exists.</li>
+      <li><code>BenchmarkLookupSkill</code> — Mailchimp's anonymized aggregate benchmarks (open rate, click rate, deliverability norms by vertical). The prototype's "How this was generated" tab cites this.</li>
+      <li><code>CustomerContextSkill</code> — pulls plan tier, vertical, geography, lifecycle stage. The PRD calls this out as a P0 dependency on "C1 profile that AI Science is building" — meaning <strong>partially exists, not fully</strong>.</li>
+    </ul>
+    <p>If these exist, the new audit skills compose on top of them. If they don't, they become net-new P0 dependencies and the audit slips. <strong>Must be confirmed with AI Science before scoping commits.</strong></p>
+
+    <hr>
+
+    <h2 id="tools">2. Tools / APIs / Data (the data plane underneath the skills)</h2>
+    <p>Skills are useless without typed tools that query real systems. Here's the inventory of what each skill needs, where it likely comes from, and what's a gap.</p>
+
+    <h3 id="data-plane">2.1 Mailchimp data-plane tools</h3>
+    <table>
+      <thead>
+        <tr><th>Tool</th><th>Returns</th><th>Used by</th><th>Source [inferred — verify]</th><th>Gap risk</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>getCampaignMetadata(campaign_id)</code></td><td>subject, preview, send time, audience id, automation id, content blocks, CTA copy, link destinations, alt text presence</td><td>All dimension skills</td><td>Mailchimp Campaigns API + content store</td><td><span class="gap-low">Low — exists</span></td></tr>
+        <tr><td><code>getCampaignPerformance(campaign_id, channel)</code></td><td>sends, opens, clicks, bounces, unsubs, complaints, revenue (if connected store)</td><td>All dimension skills</td><td>Analytics Agent BigQuery / StarRocks</td><td><span class="gap-low">Low — exists</span></td></tr>
+        <tr><td><code>getCampaignPortfolio(account_id, window)</code></td><td>list of campaigns + per-campaign performance summary</td><td><code>AuditPlannerSkill</code>, <code>OfferValuePropSkill</code>, <code>PerformanceRealitySkill</code></td><td>Same as above, aggregated</td><td><span class="gap-low">Low — exists</span></td></tr>
+        <tr><td><code>getAudienceSnapshot(audience_id)</code></td><td>subscriber count, segments + sizes, tags, lifecycle stages, behavioral attributes</td><td><code>AudienceSegmentationSkill</code></td><td>Mailchimp Audience API + CDP/StarRocks</td><td><span class="gap-med">Medium — segment-with-attributes data may not be query-shaped for "find unused segment with quantified delta"</span></td></tr>
+        <tr><td><code>getSegmentLift(audience_id, segment_id, campaign_id)</code></td><td>conversion / revenue lift of segment vs full-list baseline</td><td><code>AudienceSegmentationSkill</code>, <code>ActionSynthesizerSkill</code></td><td><strong>Likely net-new</strong></td><td><span class="gap-high">High — the "3.2× past-purchaser conversion" claim in the prototype requires this. May need a feature in the analytics warehouse.</span></td></tr>
+        <tr><td><code>getDeliverabilitySignals(account_id, window)</code></td><td>bounce rates by ISP, complaint rates, inbox placement estimates, authentication status (SPF/DKIM/DMARC), reputation score</td><td><code>DeliverabilityListHealthSkill</code></td><td>MTA / SparkPost equivalent + existing Mailchimp deliverability service</td><td><span class="gap-med">Medium — verify ISP-level granularity is queryable</span></td></tr>
+        <tr><td><code>getSuppressionList(account_id)</code></td><td>suppression entries with reason, hygiene score</td><td><code>DeliverabilityListHealthSkill</code>, <code>ComplianceCustomerVoiceSkill</code></td><td>Mailchimp Suppression API</td><td><span class="gap-low">Low</span></td></tr>
+        <tr><td><code>getUnsubReasons(account_id, window)</code></td><td>free-text + categorical unsub reasons + spam complaints with campaign attribution</td><td><code>ComplianceCustomerVoiceSkill</code></td><td><strong>Verify availability of free-text unsub reasons in queryable form.</strong></td><td><span class="gap-high">High — prototype's headline content for Dim 9. If unsub free-text isn't captured + queryable, this dimension hollows out.</span></td></tr>
+        <tr><td><code>getSMSCampaign / getAutomation</code></td><td>SMS sends + automation runs + outcomes</td><td><code>CrossChannelCoherenceSkill</code></td><td>SMS service + Customer Journey Builder data</td><td><span class="gap-high">High — open question in PRD. Must confirm aggregate access, not just deliverability metrics.</span></td></tr>
+        <tr><td><code>getConnectedStoreOrders(account_id, window)</code></td><td>orders + revenue attributed to MC sends + AOV + product catalog</td><td><code>PerformanceRealitySkill</code>, <code>ConversionPathSkill</code></td><td>E-commerce integration data plane</td><td><span class="gap-med">Medium — exists for connected stores; absent for non-connected. Affects abstain logic.</span></td></tr>
+        <tr><td><code>getBenchmarks(vertical, plan_tier, metric)</code></td><td>industry benchmark ranges for a metric</td><td>All dimension skills</td><td><strong>Likely exists</strong> as the Analytics Agent already cites benchmarks.</td><td><span class="gap-low">Low</span></td></tr>
+        <tr><td><code>getRenderTestData(campaign_id)</code></td><td>render quality across clients + dark mode + image-to-text ratio</td><td><code>CreativeRenderSkill</code></td><td><strong>Time-boxed dependency on Q4 render-test pipeline</strong></td><td><span class="gap-high">High — explicitly held P2; abstain path required in V1.</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="customer-context-tools">2.2 Customer-context tools</h3>
+    <table>
+      <thead>
+        <tr><th>Tool</th><th>Returns</th><th>Used by</th><th>Source</th><th>Gap risk</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>getC1Profile(account_id)</code></td><td>plan tier, lifecycle stage, ICP, vertical, geography</td><td><code>AuditPlannerSkill</code>, <code>ActionSynthesizerSkill</code>, all dimensions for context</td><td><strong>PRD dependency on "C1 profile AI Science is building"</strong></td><td><span class="gap-high">High — named PRD dependency. Without this, recommendations can't be ICP-aware.</span></td></tr>
+        <tr><td><code>getBrandProfile(account_id)</code></td><td>brand voice, tone, audience persona, business type</td><td><code>IntentOutcomeFitSkill</code>, <code>OfferValuePropSkill</code>, <code>ActionSynthesizerSkill</code></td><td><strong>Verify</strong> — Mailchimp Brand Kit / Creative Assistant context</td><td><span class="gap-med">Medium — without brand voice, action recommendations read generic.</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="alf">2.3 ALF labels and other Intuit-platform tools</h3>
+    <p>The user explicitly asked about <strong>ALF labels</strong>. Treating them as Intuit's Adaptive Learning Framework / labeling service used to enrich customer or content records with structured tags.</p>
+    <p><strong>[Inferred — verify with the platform team]</strong> ALF labels would enrich the audit in three ways:</p>
+    <ol>
+      <li><strong>Campaign-content classification</strong> — ALF labels on subject lines / content (e.g., promo-discount, brand, transactional, abandonment-recovery) feed <code>IntentOutcomeFitSkill</code> and <code>OfferValuePropSkill</code>. Without ALF, the LLM has to classify content from scratch each call — expensive, inconsistent, hallucinatable.</li>
+      <li><strong>Audience / contact labels</strong> — ALF-derived contact attributes (predicted-lifetime-value bucket, predicted-churn-risk, engagement tier) feed <code>AudienceSegmentationSkill</code> and the segment-lift counterfactual. The "past-purchaser converts 3.2× higher" insight likely sits on top of an ALF-style label.</li>
+      <li><strong>Vertical / ICP enrichment</strong> — ALF labels at the account level provide vertical and ICP. Feeds <code>getC1Profile</code> and benchmark selection.</li>
+    </ol>
+    <p><strong>Tools to add:</strong></p>
+    <table>
+      <thead><tr><th>Tool</th><th>Purpose</th><th>Dimension consumers</th></tr></thead>
+      <tbody>
+        <tr><td><code>getALFContentLabels(campaign_id)</code></td><td>Content-type / intent / offer-type labels for a campaign's content</td><td>Dim 1, Dim 3</td></tr>
+        <tr><td><code>getALFContactLabels(audience_id, segment_id)</code></td><td>Predicted attributes (LTV, churn, engagement tier) for the audience or segment</td><td>Dim 2</td></tr>
+        <tr><td><code>getALFAccountLabels(account_id)</code></td><td>Vertical, ICP, business-type labels</td><td>Planner + all skills (for tone)</td></tr>
+      </tbody>
+    </table>
+    <p>If ALF doesn't yet have these labels at the right granularity, two paths:</p>
+    <ul>
+      <li><strong>Path A:</strong> Generate them on-the-fly with an LLM classifier in V1; backfill ALF later.</li>
+      <li><strong>Path B:</strong> Block on ALF labeling pipeline.</li>
+      <li><strong>Recommend Path A for V1</strong> — keeps the audit shippable; flag to ALF team as the durable solution. The classification cost is bounded (per-campaign, cached per audit run).</li>
+    </ul>
+
+    <h3 id="deeplinks">2.4 Action-deep-link tools (V1)</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>buildSegmentBuilderURL(rule)</code></td><td>Returns a Mailchimp URL that opens Segment Builder pre-populated with the rule (e.g., "purchased in last 12 months").</td></tr>
+        <tr><td><code>buildTemplateSaveURL(campaign_id, template_name)</code></td><td>Opens template-save flow pre-filled.</td></tr>
+        <tr><td><code>buildJourneyBuilderURL(template)</code></td><td>Opens CJB with a starter template (e.g., abandonment recovery).</td></tr>
+        <tr><td><code>buildSuppressionRuleURL(rule)</code></td><td>Opens suppression-rule editor pre-filled.</td></tr>
+        <tr><td><code>buildABTestURL(campaign_id, variant_type)</code></td><td>Opens A/B test flow pre-filled.</td></tr>
+        <tr><td><code>buildInboxPreviewURL(campaign_id)</code></td><td>Opens render preview.</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Net new contract.</strong> These require Mailchimp surface URLs + prefill query-param schemas to be standardized. <strong>Eng-and-Design tax</strong> — but small, and the contract is reusable across other Mailchimp AI features. Worth doing.</p>
+
+    <h3 id="gap-heatmap">2.5 Tools / APIs summary — gap heat-map</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Gap heat</th></tr></thead>
+      <tbody>
+        <tr><td>Campaign metadata + performance + portfolio + benchmarks + suppression</td><td><span class="gap-low">Low — exists.</span></td></tr>
+        <tr><td>Audience snapshot, deliverability ISP-level, store orders</td><td><span class="gap-med">Medium — verify granularity.</span></td></tr>
+        <tr><td>Segment-lift counterfactual, unsub free-text NLP, SMS + automation joined data, render test, C1 profile, ALF labels at content/contact/account granularity</td><td><span class="gap-high">High — these are the named-or-implicit gaps. Each is a P0 confirmation item with AI Science + Eng before Phase 1 lands.</span></td></tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <h2 id="context">3. Context — new sources, new composition, or both</h2>
+
+    <h3 id="new-context-types">3.1 New context types beyond what the Analytics Agent has today</h3>
+    <p>The Analytics Agent today is built for ad-hoc Q&amp;A: a customer asks a question, the agent retrieves the slice of data needed, returns an answer. The Audit is <strong>categorically different</strong> — it's proactive, comprehensive, multi-dimensional, and <em>prescriptive</em>. Three new context types are required:</p>
+
+    <h4>(a) Cross-campaign context (corpus-level, not single-campaign)</h4>
+    <p>The prototype's Action #1 ("save this campaign as a Gift Guide template — your top revenue broadcast in 90 days") and Dim 3 ("patterns across your own winning subject lines") require <em>the customer's full campaign history</em> in retrieval scope, not just the campaign under audit.</p>
+    <ul>
+      <li><strong>What to build:</strong> A campaign-corpus retrieval mode that pulls last N (~90–180 days) of campaigns into a single retrieval window, indexed by performance + content embedding for similarity / pattern queries.</li>
+      <li><strong>Composition change:</strong> New <code>CorpusContext</code> block in the system prompt — feeds Dim 3, 5, 6, 8, 10. Without it, "patterns in my own winners vs. losers" is impossible.</li>
+    </ul>
+
+    <h4>(b) Customer-voice / qualitative context</h4>
+    <p>Dim 9's headline content is <em>unsubscribe-reason themes with verbatim quotes</em>. This is qualitative, NLP-derived context the existing Analytics Agent likely doesn't surface — its job is metrics, not free-text clustering.</p>
+    <ul>
+      <li><strong>What to build:</strong> A free-text clustering pass over unsub reasons, "I didn't sign up" complaints, and spam-complaint content, themed and quantified, with verbatim quote selection.</li>
+      <li><strong>Composition change:</strong> New <code>CustomerVoiceContext</code> block — <em>this is the prototype's most differentiated data surface</em>, the one customers say "I've never seen this before."</li>
+    </ul>
+
+    <h4>(c) Brand-and-account context (always present, never optional)</h4>
+    <p>For an audit to read "personalized, on-brand," every dimension's narrative needs the customer's brand voice + account context as ambient context.</p>
+    <ul>
+      <li><strong>What to build:</strong> A <code>CustomerProfileContext</code> block — C1 profile + brand voice + plan tier + vertical + lifecycle stage — assembled once per audit, injected into every dimension skill's prompt.</li>
+      <li><strong>Composition change:</strong> Lift this from on-demand retrieval to <strong>per-audit pre-fetched ambient context</strong>. Cheap and high-leverage.</li>
+    </ul>
+
+    <h3 id="composition">3.2 New retrieval / composition patterns</h3>
+    <p>Three runtime changes in <em>how</em> context is retrieved and composed:</p>
+
+    <h4>(i) Context budget per skill, not per turn</h4>
+    <p>Today's pattern (assumed): one user question → one retrieval pass → one LLM call. The audit fans out into 10 dimension skills running in parallel; each needs its own focused context bundle, not the union of all retrievals. This means a <strong>context-router</strong> that selects the right slice for each skill (e.g., <code>DeliverabilityListHealthSkill</code> gets ISP-level deliverability + suppression + bounce trend; not subject-line embeddings). Saves cost and reduces prompt cross-talk.</p>
+
+    <h4>(ii) Pre-fetched ambient + skill-specific dynamic</h4>
+    <p>Pattern: Planner pre-fetches <code>CustomerProfileContext</code> + <code>CampaignPortfolioContext</code> once; each dimension skill is invoked with <code>(skill_query, ambient_context, dimension_specific_context)</code>. This is a small but real change — today's pattern is likely all-dynamic per call.</p>
+
+    <h4>(iii) Evidence-citation discipline at every skill output</h4>
+    <p>The prototype's "Generated by AI" pill + "Each finding cites a specific data point" methodology copy commits to <strong>citation-grounded output</strong>. Every finding string returned by a skill must come with <code>evidence: [{metric, value, period, source_table}]</code> so the UI can show "why this finding." Without this, the "How this was generated" tab is theater. This is a structured-output requirement (JSON schema enforcement at the LLM layer) more than a retrieval change, but it's the runtime-composition discipline that makes the trust mechanic work.</p>
+
+    <h3 id="governance">3.3 Context governance</h3>
+    <p>Three discipline items for the leadership shareout:</p>
+    <ul>
+      <li><strong>Data-availability propagation.</strong> Every retrieval call must return <code>dataAvailability: {full | partial | none}</code>; every skill must propagate it; the Aggregator must surface it as the <code>No data</code> pill in the UI. End-to-end, not just at the prompt layer.</li>
+      <li><strong>Stale-data guards.</strong> Audits cite specific data points by date. If retrieval returns stale data (cache miss masquerading as fresh), the audit is wrong but confident. Audits should fail closed when freshness &lt; threshold rather than silently using stale data.</li>
+      <li><strong>PII / privacy posture for unsub reasons + verbatim quotes.</strong> Dim 9 quotes customer free-text. PII redaction must be in the retrieval pipeline before the LLM sees it, not bolted on after.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="diagram">Architecture diagram</h2>
+<pre><code>                    ┌──────────────────────────────────────────────────┐
+                    │  Trigger: CSM/AM tool OR in-product audit button │
+                    └──────────────────────────┬───────────────────────┘
+                                               ▼
+                                  ┌────────────────────────┐
+                                  │   AuditPlannerSkill    │
+                                  │  (scope, time window,  │
+                                  │   per-dim depth)       │
+                                  └─────────┬──────────────┘
+                                            │
+                       ┌────────────────────┼─────────────────────┐
+                       ▼                    ▼                     ▼
+                ┌─────────────┐      ┌─────────────┐       ┌─────────────┐
+                │  Customer   │      │   Campaign  │       │  Benchmark  │
+                │   Profile   │      │   Corpus    │       │   Lookup    │
+                │  (ambient)  │      │  (corpus)   │       │             │
+                └─────┬───────┘      └─────┬───────┘       └─────┬───────┘
+                      │                    │                     │
+                      └─────────┬──────────┴──────────┬──────────┘
+                                ▼                     ▼
+                  ┌──────────────────────────────────────────────┐
+                  │   10 Dimension skills run in parallel        │
+                  │   Each: tool calls → evidence → grade        │
+                  │   Each emits: {grade, finding, evidence[],   │
+                  │                rootCause?, dataAvailability} │
+                  └──────────────────────┬───────────────────────┘
+                                         ▼
+                  ┌──────────────────────────────────────────────┐
+                  │   OverallGradeAggregatorSkill (deterministic)│
+                  │   weights + compliance-floor rule            │
+                  └──────────────────────┬───────────────────────┘
+                                         ▼
+                  ┌──────────────────────────────────────────────┐
+                  │   ActionSynthesizerSkill (LLM, structured)   │
+                  │   5–7 ranked actions with deep-link payloads │
+                  └──────────────────────┬───────────────────────┘
+                                         ▼
+                  ┌──────────────────────────────────────────────┐
+                  │   AuditReport (typed schema) → Renderer      │
+                  │   → Prototype UI (Overview / Dimensions /    │
+                  │     How this was generated tabs)             │
+                  └──────────────────────────────────────────────┘
+</code></pre>
+
+    <hr>
+
+    <h2 id="verification">Verification — how to test the architecture end-to-end</h2>
+    <p>(How any team would prove this works before the leadership shareout — these are checks, not implementation steps.)</p>
+    <ol>
+      <li><strong>Skill-level eval.</strong> Run each of the 10 dimension skills against a curated set of 10 pilot accounts; compare to expert-CSM ground truth on dimension grade, root-cause quality, and citation accuracy. Per-dimension F1 + hallucination rate.</li>
+      <li><strong>Aggregator determinism.</strong> Feed identical dimension-skill outputs through the Aggregator 100 times; confirm grade is byte-identical (zero LLM, all rule logic).</li>
+      <li><strong>Action synthesis A/B.</strong> Run <code>ActionSynthesizerSkill</code> on the same dimension outputs across 3 runs; confirm action-set Jaccard similarity ≥ 0.8 (consistency under stable inputs is a P0 eval criterion in the PRD).</li>
+      <li><strong>End-to-end abstain test.</strong> Inject a synthetic SMS-data-unavailable case; confirm <code>CrossChannelCoherenceSkill</code> returns <code>dataAvailability: none</code>, the dimension renders <code>No data</code>, the audit completes successfully, and the action list does not reference SMS.</li>
+      <li><strong>Deep-link contract test.</strong> For each action type (segment / suppression / template / journey / A/B / inbox-preview), click the deep-link and confirm the Mailchimp surface opens with prefilled state.</li>
+      <li><strong>PII guard test.</strong> Feed an unsub free-text containing email + phone; confirm the redaction pipeline strips before the LLM sees it.</li>
+      <li><strong>Latency floor.</strong> Per PRD, V1 prioritizes quality over latency; still, set a 5-minute ceiling for back-end pilot runs and confirm.</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="open-questions">Open questions for the leadership shareout</h2>
+    <ol>
+      <li><strong>Does the existing Analytics Agent retrieval layer expose customer-corpus retrieval (last 90–180 days as a single window), or is it single-question-shaped?</strong> Determines whether <code>CampaignPortfolioContext</code> is a retrieval-config change or a new pipeline.</li>
+      <li><strong>Are SMS + automation aggregate signals join-able with email at the campaign / portfolio level today (not just deliverability metrics)?</strong> Determines whether <code>CrossChannelCoherenceSkill</code> is feasible in V1 or must be deferred. Already an open question in the PRD; this architecture can't proceed without resolution.</li>
+      <li><strong>Is the C1 profile from AI Science delivering by pilot date, with brand voice + ICP + vertical?</strong> Without it, every dimension reads generic. The PRD calls this out softly; it should be elevated to a named risk with a delivery commitment.</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="summary">Recommendation summary (one screen)</h2>
+    <ul>
+      <li><strong>Net new skills (16 total):</strong> 10 Audit-Dimension + 3 Audit-Composition + 5 Action-Execution (V1.5+, cross-team-dependent). V1 ships with 10 + 3 + <code>DeepLinkActionSkill</code>.</li>
+      <li><strong>Net new tools (≈14):</strong> Reuse existing Mailchimp data-plane where possible. The high-gap items are <code>getSegmentLift</code>, <code>getUnsubReasons</code> (free-text), SMS+automation joined retrieval, render test data, C1 profile, ALF labels at three granularities. Path A (LLM classifier as fallback for missing ALF labels) keeps V1 shippable.</li>
+      <li><strong>Net new context types (3):</strong> Campaign-corpus context (for cross-campaign pattern detection), CustomerVoice context (free-text NLP for Dim 9), pre-fetched CustomerProfile ambient context (for personalized tone).</li>
+      <li><strong>Net new retrieval/composition patterns (3):</strong> Per-skill context routing, ambient + dynamic split, evidence-citation discipline as a structured-output requirement.</li>
+      <li><strong>The architectural choice that matters most:</strong> Skill-per-dimension with abstain-as-first-class-output. This is what makes the prototype's "No data" pill and "How this was generated" tab credible at scale, and it's the single biggest difference between the existing Analytics Agent's Q&amp;A pattern and this Audit pattern.</li>
+    </ul>
+
+    <div class="footer-meta">
+      Generated for the Mailchimp R&amp;A team · Architecture inputs: PRD (Stephen Yu) + Vision Prototype (campaign-audit/Design Bench).
+    </div>
+  </main>
+</div>
+</body>
+</html>
