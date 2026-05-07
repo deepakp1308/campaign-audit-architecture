@@ -49,13 +49,28 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     font-weight: 600;
   }
   aside.toc .ai-icon {
     color: var(--ai-teal);
     font-size: 18px;
   }
+  aside.toc .doc-switch {
+    display: flex; gap: 6px; margin-bottom: 24px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  aside.toc .doc-switch a {
+    flex: 1; text-align: center; padding: 6px 10px;
+    border-radius: 6px; font-size: 11px; font-weight: 600;
+    text-decoration: none; color: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.12); transition: all 0.15s;
+  }
+  aside.toc .doc-switch a.current {
+    background: rgba(0, 185, 169, 0.16); color: #fff;
+    border-color: rgba(0, 185, 169, 0.5);
+  }
+  aside.toc .doc-switch a:hover { color: #fff; border-color: var(--ai-teal); }
   aside.toc .meta {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.6);
@@ -258,6 +273,10 @@
 <div class="layout">
   <aside class="toc">
     <div class="brand"><span class="ai-icon">✦</span> Campaign Audit · Architecture</div>
+    <div class="doc-switch">
+      <a href="./" class="current">Architecture</a>
+      <a href="./eval.html">Eval Framework</a>
+    </div>
     <div class="meta">
       Source: PRD (Stephen Yu) + Vision Prototype<br>
       Audience: Eng + AI Science + PM<br>

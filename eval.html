@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Framework: AI Campaign Health Intelligence</title>
+<style>
+  :root {
+    --sidebar: #162251;
+    --bg: #f0f4f8;
+    --paper: #ffffff;
+    --border: #e8edf5;
+    --text: #1a1f36;
+    --text-secondary: #6b7c93;
+    --accent: #0070d2;
+    --ai-teal: #00b9a9;
+    --green: #1aab68;
+    --red: #d13438;
+    --amber: #d97706;
+    --code-bg: #f6f8fb;
+    --shadow: 0 1px 4px rgba(26, 40, 96, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  aside.toc {
+    background: var(--sidebar); color: #fff;
+    padding: 32px 24px; position: sticky; top: 0;
+    height: 100vh; overflow-y: auto;
+  }
+  aside.toc .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 600; }
+  aside.toc .ai-icon { color: var(--ai-teal); font-size: 18px; }
+  aside.toc .doc-switch {
+    display: flex; gap: 6px; margin-bottom: 24px; padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;
+  }
+  aside.toc .doc-switch a {
+    flex: 1; text-align: center; padding: 6px 10px;
+    border-radius: 6px; font-size: 11px; font-weight: 600;
+    text-decoration: none; color: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.12); transition: all 0.15s;
+  }
+  aside.toc .doc-switch a.current {
+    background: rgba(0, 185, 169, 0.16); color: #fff;
+    border-color: rgba(0, 185, 169, 0.5);
+  }
+  aside.toc .doc-switch a:hover { color: #fff; border-color: var(--ai-teal); }
+  aside.toc .meta {
+    font-size: 12px; color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 24px; line-height: 1.5;
+  }
+  aside.toc h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.5); margin: 24px 0 8px; font-weight: 600;
+  }
+  aside.toc a {
+    display: block; color: rgba(255, 255, 255, 0.85);
+    text-decoration: none; padding: 6px 0; font-size: 13px;
+    border-left: 2px solid transparent;
+    padding-left: 10px; margin-left: -10px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  aside.toc a:hover { color: #fff; border-left-color: var(--ai-teal); }
+  aside.toc a.sub { padding-left: 22px; font-size: 12px; color: rgba(255, 255, 255, 0.6); }
+  main { padding: 48px 56px 96px; max-width: 980px; }
+  header.title-block {
+    margin-bottom: 40px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.title-block .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(90deg, rgba(0, 185, 169, 0.12), rgba(0, 112, 210, 0.10));
+    color: var(--ai-teal); border: 1px solid rgba(0, 185, 169, 0.24);
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600; margin-bottom: 14px;
+  }
+  header.title-block h1 {
+    font-size: 32px; font-weight: 600; margin: 0 0 12px;
+    color: var(--text); letter-spacing: -0.01em;
+  }
+  header.title-block .subtitle { font-size: 15px; color: var(--text-secondary); margin: 0; }
+  h1, h2, h3, h4 { color: var(--text); font-weight: 600; }
+  h2 { font-size: 22px; margin: 48px 0 16px; padding-top: 16px; letter-spacing: -0.005em; }
+  h3 { font-size: 17px; margin: 28px 0 10px; }
+  h4 { font-size: 14px; margin: 20px 0 8px; }
+  p { margin: 0 0 14px; }
+  strong { color: var(--text); font-weight: 600; }
+  em { color: var(--text); font-style: italic; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  ul, ol { margin: 0 0 16px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--code-bg); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px; font-size: 12.5px; color: var(--text);
+  }
+  pre {
+    background: #0d1530; color: #e8edf5;
+    padding: 20px 24px; border-radius: 8px; overflow-x: auto;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px; line-height: 1.55; margin: 16px 0 24px;
+  }
+  pre code { background: transparent; border: none; padding: 0; color: inherit; font-size: inherit; }
+  table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 16px 0 24px;
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    font-size: 13px; box-shadow: var(--shadow);
+  }
+  thead th {
+    background: #f7faff; color: var(--text);
+    text-align: left; padding: 12px 14px; font-weight: 600;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(0, 112, 210, 0.025); }
+  blockquote {
+    margin: 16px 0; padding: 14px 20px;
+    background: rgba(0, 185, 169, 0.06);
+    border-left: 3px solid var(--ai-teal);
+    border-radius: 4px; color: var(--text);
+  }
+  .callout {
+    background: var(--paper); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 8px;
+    padding: 16px 20px; margin: 18px 0 24px;
+    box-shadow: var(--shadow);
+  }
+  .callout.warn { border-left-color: var(--amber); }
+  .callout.warn::before {
+    content: "⚠ Caveat"; display: block;
+    font-size: 12px; font-weight: 600; color: var(--amber);
+    margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .callout.success { border-left-color: var(--green); }
+  .callout.success::before {
+    content: "✓ Pass criterion"; display: block;
+    font-size: 12px; font-weight: 600; color: var(--green);
+    margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .callout.fail { border-left-color: var(--red); }
+  .callout.fail::before {
+    content: "✗ Fail mode"; display: block;
+    font-size: 12px; font-weight: 600; color: var(--red);
+    margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .threshold-pass { color: var(--green); font-weight: 600; }
+  .threshold-warn { color: var(--amber); font-weight: 600; }
+  .threshold-fail { color: var(--red); font-weight: 600; }
+  .footer-meta {
+    margin-top: 64px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary); font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside.toc { position: static; height: auto; }
+    main { padding: 32px 24px 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc">
+    <div class="brand"><span class="ai-icon">✦</span> Campaign Audit · Eval</div>
+    <div class="doc-switch">
+      <a href="./">Architecture</a>
+      <a href="./eval.html" class="current">Eval Framework</a>
+    </div>
+    <div class="meta">
+      Companion to the architecture doc<br>
+      Audience: AI Science + Eng + PM<br>
+      Status: Pre-pilot draft
+    </div>
+    <h4>Sections</h4>
+    <a href="#why">Why eval is the gate</a>
+    <a href="#requirements">1. Eval requirements</a>
+    <a href="#req-coverage" class="sub">Coverage</a>
+    <a href="#req-axes" class="sub">Quality axes</a>
+    <a href="#req-datasets" class="sub">Datasets</a>
+    <a href="#req-cadence" class="sub">Cadence</a>
+    <a href="#criteria">2. Criteria & metrics</a>
+    <a href="#crit-skill" class="sub">Per-skill metrics</a>
+    <a href="#crit-system" class="sub">System-level metrics</a>
+    <a href="#crit-customer" class="sub">Customer-outcome metrics</a>
+    <a href="#thresholds">3. Success measures (thresholds)</a>
+    <a href="#thresh-launch" class="sub">Pilot-launch gates</a>
+    <a href="#thresh-ga" class="sub">GA gates</a>
+    <a href="#decisions">4. Decision log protocol</a>
+    <a href="#dec-pass" class="sub">Pass paths</a>
+    <a href="#dec-warn" class="sub">Warn paths</a>
+    <a href="#dec-fail" class="sub">Fail paths</a>
+    <a href="#dec-template" class="sub">Decision-log template</a>
+    <a href="#judge">5. LLM-as-judge</a>
+    <a href="#judge-when" class="sub">When to use it</a>
+    <a href="#judge-arch" class="sub">Architecture</a>
+    <a href="#judge-prompts" class="sub">Judge prompts</a>
+    <a href="#judge-calibration" class="sub">Calibration</a>
+    <a href="#judge-pitfalls" class="sub">Pitfalls</a>
+    <a href="#improve">6. Closed-loop improvement</a>
+    <a href="#timeline">Timeline & ownership</a>
+    <a href="#summary">Summary</a>
+  </aside>
+
+  <main>
+    <header class="title-block">
+      <span class="pill">✦ Eval Framework</span>
+      <h1>Eval Requirements, Criteria, Success Measures, and LLM-as-Judge Design</h1>
+      <p class="subtitle">Companion to the technical architecture. How we measure whether the audit is good enough to ship, how we decide what to do when it isn't, and how an LLM judge fits into the closed-loop improvement system.</p>
+    </header>
+
+    <div class="callout warn">
+      The PRD names "Eval &amp; Quality Framework" as a P0 requirement and the gating event for in-product external surfacing. This document operationalizes that P0 — it is the eval design that decides whether V1 can leave CSM-only briefing and reach customers. Numbers in thresholds are <strong>recommended starting points</strong> based on the PRD's quality posture; AI Science should sign off on final values before pilot.
+    </div>
+
+    <h2 id="why">Why eval is the gate, not the test</h2>
+
+    <p>The PRD makes two commitments that only an eval framework can enforce:</p>
+    <ol>
+      <li><strong>"Quality over latency &amp; cost for V1."</strong> Without measurement, "quality" is rhetoric. The eval defines what quality is, in numbers.</li>
+      <li><strong>"Trust at scale requires measurable quality."</strong> The Eval Framework row in the PRD is the only thing that lets the audit cross the threshold from CSM-only to customer-facing. Without it, in-product launch is a faith bet.</li>
+    </ol>
+
+    <p>The audit has three failure modes that ordinary AI-feature evals don't catch:</p>
+    <ul>
+      <li><strong>Confident wrongness.</strong> The agent grades a dimension B but the right answer is C. The customer acts on a wrong root cause and trust collapses.</li>
+      <li><strong>Hallucinated specificity.</strong> The agent claims "past purchasers convert 3.2× higher" when the actual number is 1.2× — or worse, when no past-purchaser segment exists. Citation looks credible; underlying number is fabricated.</li>
+      <li><strong>Inconsistency on stable inputs.</strong> Two audits run a day apart on the same data return different grades or different actions. CSMs notice immediately; customers do too.</li>
+    </ul>
+
+    <p>An eval that catches all three needs <em>three layers</em>: per-skill correctness, system-level consistency, and customer-outcome lift. Layered, not picked.</p>
+
+    <hr>
+
+    <h2 id="requirements">1. Eval requirements</h2>
+
+    <h3 id="req-coverage">1.1 Coverage requirements</h3>
+
+    <p>Every audit-producing component must be evaluable, with no holes. The architecture has 16 net-new skills (10 dimension + 3 composition + ≥3 action-execution). Every one of them needs:</p>
+
+    <ul>
+      <li><strong>An input contract</strong> — typed inputs with explicit data-availability flags, so eval cases can construct partial-data scenarios deterministically.</li>
+      <li><strong>An output contract</strong> — typed outputs that include grade, finding, evidence with citations, root cause, data-availability, and any structured payloads (action chips, deep-link state).</li>
+      <li><strong>At least one ground-truth set</strong> — accounts where the right answer is known (expert-CSM-graded), and at least one synthetic-stress set (deliberately broken inputs to test abstain behavior).</li>
+    </ul>
+
+    <p>Coverage gaps that disqualify the audit from pilot launch:</p>
+    <ul>
+      <li>Any of the 10 dimension skills lacking ≥20 ground-truth cases.</li>
+      <li>The action synthesizer lacking a ranked-actions ground-truth set (expert-CSM action lists for ≥10 accounts).</li>
+      <li>Any retrieval tool lacking a freshness/staleness test fixture.</li>
+      <li>No abstain-behavior test (synthetic data-unavailable case for at least 3 dimensions).</li>
+    </ul>
+
+    <h3 id="req-axes">1.2 Quality axes (what we measure)</h3>
+
+    <p>Seven quality axes, mapped to PRD's eval requirements row + the prototype's UI commitments:</p>
+
+    <table>
+      <thead>
+        <tr><th>Axis</th><th>What it measures</th><th>Why it matters</th><th>Primary measure</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Dimension accuracy</strong></td><td>Skill's grade matches expert-CSM grade on a held-out set</td><td>If the audit grades a dimension wrong, every downstream action it generates is wrong</td><td>Per-dimension accuracy + confusion matrix</td></tr>
+        <tr><td><strong>Hallucination rate</strong></td><td>Findings cite numbers/facts not present in retrieved evidence</td><td>One fabricated statistic in a CSM-shared deck destroys trust</td><td>% of findings with unverifiable claims (LLM-judge + spot-check)</td></tr>
+        <tr><td><strong>Evidence-citation fidelity</strong></td><td>Every quantitative claim cites an actual data point with correct value, period, source</td><td>"How this was generated" tab is theater without this</td><td>% of claims with valid citation tuple</td></tr>
+        <tr><td><strong>Root-cause quality</strong></td><td>Diagnostic chain on Moderate/Needs-Attention dimensions matches expert reasoning, or skill abstains explicitly</td><td>"Wrong root cause" is the most attacker-able failure mode in the architecture</td><td>Expert-rated 4-point quality score + abstain-correctness</td></tr>
+        <tr><td><strong>Action relevance</strong></td><td>Top-5 actions match what an expert would prioritize, given the same dimension findings</td><td>Audit's value is in the actions; if those are wrong, nothing else matters</td><td>Top-K Jaccard vs. expert action set + expert relevance rating</td></tr>
+        <tr><td><strong>ROI calibration</strong></td><td>Directional ROI claims ("modest lift," "high impact") match observed reality on actioned audits</td><td>Quantitative ROI is gated on this; without calibration evidence, V1 stays directional</td><td>Pearson correlation of predicted vs. observed lift on actioned cases</td></tr>
+        <tr><td><strong>Consistency</strong></td><td>Re-running the same audit on stable data produces ≥80% identical grades and overlapping action sets</td><td>CSMs lose faith fast if Monday's audit and Tuesday's audit disagree</td><td>Jaccard similarity of action sets across N reruns + grade match rate</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="req-datasets">1.3 Datasets required</h3>
+
+    <p>Five datasets, each owned and named:</p>
+
+    <table>
+      <thead>
+        <tr><th>Dataset</th><th>Purpose</th><th>Size</th><th>Owner</th><th>Refresh</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Golden-CSM set</strong></td><td>Real customer accounts with full expert-CSM audits as ground truth</td><td>20–30 accounts initially; grow to 100 by GA</td><td>PM + CSM org</td><td>Quarterly</td></tr>
+        <tr><td><strong>Synthetic-stress set</strong></td><td>Deliberately constructed cases (missing data, edge cases, unusual verticals, recent migrations) to test abstain behavior + failure isolation</td><td>~30 cases</td><td>AI Science</td><td>As-needed when new failure modes appear</td></tr>
+        <tr><td><strong>Replay-consistency set</strong></td><td>Frozen account snapshots (data-stable as of a date) used for consistency testing across reruns</td><td>10 frozen snapshots</td><td>Eng (snapshot infra) + AI Science (selection)</td><td>Refreshed quarterly</td></tr>
+        <tr><td><strong>Outcome-tracking set</strong></td><td>Pilot accounts where audit was run AND audit's recommended actions were taken AND next-campaign performance was measured</td><td>Builds during pilot — target 50+ actioned audits by GA gate</td><td>PM + Data Science</td><td>Continuous</td></tr>
+        <tr><td><strong>VOC adversarial set</strong></td><td>Audits where customers / CSMs flagged a finding as wrong, generic, or off-brand — feeds eval regressions</td><td>Builds during pilot</td><td>PM + CSM org</td><td>Continuous</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="req-cadence">1.4 Eval cadence</h3>
+
+    <ul>
+      <li><strong>Pre-merge per skill</strong> — every change to a dimension skill, the action synthesizer, or a retrieval tool runs the relevant golden-CSM and synthetic-stress subsets. Block merge on regression beyond defined deltas (see thresholds).</li>
+      <li><strong>Daily full-suite</strong> — full eval suite against the replay-consistency set; alert on consistency drops or hallucination-rate creep.</li>
+      <li><strong>Weekly outcome review</strong> — outcome-tracking set growth + customer/CSM VOC review; new adversarial cases land in the VOC set the same week.</li>
+      <li><strong>Quarterly recalibration</strong> — golden-CSM set refresh, judge calibration check (see §5.4), threshold review based on cumulative outcomes.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="criteria">2. Criteria &amp; metrics</h2>
+
+    <p>Three layers of metrics, mapped to the architecture layers (skills → system → customer outcome).</p>
+
+    <h3 id="crit-skill">2.1 Per-skill metrics</h3>
+
+    <p>Each of the 10 dimension skills, the 3 composition skills, and the action-execution skills gets the same metric template (specifics vary by skill type).</p>
+
+    <table>
+      <thead>
+        <tr><th>Skill type</th><th>Metric</th><th>Definition</th><th>Eval source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="6"><strong>Dimension skills</strong> (10)</td><td>Grade accuracy</td><td>Skill's grade matches CSM golden grade ({Strong, Moderate, Needs Attention, No data})</td><td>Golden-CSM</td></tr>
+        <tr><td>Abstain correctness</td><td>Skill returns <code>dataAvailability: none</code> when data is genuinely missing; does not abstain when data exists</td><td>Synthetic-stress</td></tr>
+        <tr><td>Citation validity</td><td>% of finding's quantitative claims that map to an actual evidence tuple <code>{metric, value, period, source}</code></td><td>LLM-judge + spot-check</td></tr>
+        <tr><td>Hallucination rate</td><td>% of finding sentences containing unverifiable specific claims</td><td>LLM-judge + 10% human spot-check</td></tr>
+        <tr><td>Root-cause quality</td><td>Expert 4-point rating on diagnosis quality (4=expert-equivalent, 1=wrong cause)</td><td>Expert-CSM grading (sample)</td></tr>
+        <tr><td>Latency</td><td>P50, P95 wall-clock from skill call to typed output</td><td>Trace data</td></tr>
+        <tr><td><strong>Aggregator skill</strong></td><td>Determinism</td><td>100 reruns on identical input must produce byte-identical output</td><td>CI test (not LLM-eval — code-eval)</td></tr>
+        <tr><td rowspan="3"><strong>Action synthesizer</strong></td><td>Top-5 Jaccard vs. expert</td><td>Set similarity of top-5 ranked actions vs. expert-CSM list</td><td>Golden-CSM</td></tr>
+        <tr><td>Action relevance (per-action 5-pt)</td><td>Each action rated by expert: relevance (1–5), specificity-to-this-account (1–5), executability (1–5)</td><td>Expert grading + LLM-judge</td></tr>
+        <tr><td>Consistency across reruns</td><td>Jaccard of top-5 action sets on identical replay snapshot, 3 reruns</td><td>Replay-consistency</td></tr>
+        <tr><td><strong>Deep-link skill</strong></td><td>Surface-load success</td><td>% of generated deep-links that load the right surface with prefilled state</td><td>Synthetic — automated click test</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="crit-system">2.2 System-level metrics</h3>
+
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Definition</th><th>Eval source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Overall-grade accuracy</strong></td><td>System's A−C overall grade matches expert-CSM overall</td><td>Golden-CSM</td></tr>
+        <tr><td><strong>End-to-end latency</strong></td><td>Trigger-to-rendered-audit P50/P95 (V1: not a launch gate, but tracked)</td><td>Trace data</td></tr>
+        <tr><td><strong>Audit-completion rate</strong></td><td>% of triggered audits that produce a complete report (no skill failure cascading)</td><td>Production telemetry</td></tr>
+        <tr><td><strong>Abstain rate</strong></td><td>% of audits with ≥1 dimension marked No data — should be present (proves abstain works), not too high (proves data plane is healthy)</td><td>Production telemetry</td></tr>
+        <tr><td><strong>Citation density</strong></td><td>Average evidence citations per finding — should be ≥2 for graded dimensions</td><td>Production telemetry</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="crit-customer">2.3 Customer-outcome metrics</h3>
+
+    <p>These map directly to the PRD's success metrics.</p>
+
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Definition</th><th>Source</th><th>Maps to PRD</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Next-campaign performance lift</strong></td><td>Audited accounts vs. matched control: open / click / conversion / revenue per send. Stat-sig lift on ≥2 of 4.</td><td>Outcome-tracking + matched-control or holdout</td><td>Primary customer outcome</td></tr>
+        <tr><td><strong>Action take-rate</strong></td><td>% of recommended actions actually taken (deep-link clicked + change applied) within 14 days</td><td>Production telemetry + Mailchimp surface events</td><td>Engagement</td></tr>
+        <tr><td><strong>CSM time-to-prep reduction</strong></td><td>Median EBR/QBR prep time vs. 2–4hr baseline</td><td>CSM survey + self-report</td><td>Internal secondary</td></tr>
+        <tr><td><strong>NPS / CSAT on audit</strong></td><td>Post-audit single-question score from CSM and from customer</td><td>In-app/Slack survey</td><td>Trust posture</td></tr>
+        <tr><td><strong>Substitution signal</strong></td><td>Decline in ChatGPT-for-MC-analysis usage among engaged customers</td><td>VOC + Innovation Council pulse</td><td>Substitution-risk</td></tr>
+        <tr><td><strong>VOC defect rate</strong></td><td>% of audits where customer/CSM flagged a finding as wrong/off-brand</td><td>VOC adversarial set growth rate</td><td>Trust guardrail</td></tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <h2 id="thresholds">3. Success measures (thresholds)</h2>
+
+    <p>Three threshold tiers, with explicit pass/warn/fail bands. Numbers are <strong>recommended starting points</strong> — AI Science should sign off before pilot.</p>
+
+    <h3 id="thresh-launch">3.1 Pilot-launch gates (CSM/AM Briefing)</h3>
+
+    <p>What must be true before the audit runs against real CSM-managed accounts.</p>
+
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Pass</th><th>Warn</th><th>Fail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Per-dimension grade accuracy (avg across 10 dims)</td><td><span class="threshold-pass">≥ 80%</span></td><td><span class="threshold-warn">70–79%</span></td><td><span class="threshold-fail">&lt; 70%</span></td></tr>
+        <tr><td>Worst-dimension grade accuracy</td><td><span class="threshold-pass">≥ 70%</span></td><td><span class="threshold-warn">60–69%</span></td><td><span class="threshold-fail">&lt; 60%</span></td></tr>
+        <tr><td>Hallucination rate (per finding)</td><td><span class="threshold-pass">≤ 2%</span></td><td><span class="threshold-warn">2–5%</span></td><td><span class="threshold-fail">&gt; 5%</span></td></tr>
+        <tr><td>Citation validity (claims with evidence)</td><td><span class="threshold-pass">≥ 95%</span></td><td><span class="threshold-warn">90–94%</span></td><td><span class="threshold-fail">&lt; 90%</span></td></tr>
+        <tr><td>Root-cause quality (expert 4-pt avg)</td><td><span class="threshold-pass">≥ 3.2</span></td><td><span class="threshold-warn">2.7–3.1</span></td><td><span class="threshold-fail">&lt; 2.7</span></td></tr>
+        <tr><td>Top-5 action Jaccard vs. expert</td><td><span class="threshold-pass">≥ 0.55</span></td><td><span class="threshold-warn">0.40–0.54</span></td><td><span class="threshold-fail">&lt; 0.40</span></td></tr>
+        <tr><td>Consistency (action set Jaccard, 3 reruns)</td><td><span class="threshold-pass">≥ 0.80</span></td><td><span class="threshold-warn">0.65–0.79</span></td><td><span class="threshold-fail">&lt; 0.65</span></td></tr>
+        <tr><td>Aggregator determinism</td><td><span class="threshold-pass">100% (byte-identical)</span></td><td>—</td><td><span class="threshold-fail">Anything &lt; 100%</span></td></tr>
+        <tr><td>Abstain correctness (synthetic stress)</td><td><span class="threshold-pass">≥ 95%</span></td><td><span class="threshold-warn">85–94%</span></td><td><span class="threshold-fail">&lt; 85%</span></td></tr>
+        <tr><td>Deep-link surface-load success</td><td><span class="threshold-pass">≥ 98%</span></td><td><span class="threshold-warn">90–97%</span></td><td><span class="threshold-fail">&lt; 90%</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout success">
+      All metrics in <strong>Pass</strong> band → CSM/AM pilot launches as scheduled.
+    </div>
+    <div class="callout warn">
+      Any metric in <strong>Warn</strong> band, none in <strong>Fail</strong> → CSM/AM pilot launches with a contained-blast-radius cohort (5–8 CSMs, hand-picked accounts), expanded review cadence, and a 4-week reassessment.
+    </div>
+    <div class="callout fail">
+      Any metric in <strong>Fail</strong> band → CSM/AM pilot is blocked. Diagnose, fix, re-eval. Decision-log entry required (§4.3).
+    </div>
+
+    <h3 id="thresh-ga">3.2 In-product GA gates (self-serve customer launch)</h3>
+
+    <p>Higher bar than pilot — customer-facing exposure means hallucinations and inconsistency cost more.</p>
+
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Pass</th><th>Warn</th><th>Fail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Per-dimension grade accuracy</td><td><span class="threshold-pass">≥ 88%</span></td><td><span class="threshold-warn">82–87%</span></td><td><span class="threshold-fail">&lt; 82%</span></td></tr>
+        <tr><td>Hallucination rate</td><td><span class="threshold-pass">≤ 0.5%</span></td><td><span class="threshold-warn">0.5–1.5%</span></td><td><span class="threshold-fail">&gt; 1.5%</span></td></tr>
+        <tr><td>Citation validity</td><td><span class="threshold-pass">≥ 99%</span></td><td><span class="threshold-warn">97–98%</span></td><td><span class="threshold-fail">&lt; 97%</span></td></tr>
+        <tr><td>Top-5 action Jaccard vs. expert</td><td><span class="threshold-pass">≥ 0.65</span></td><td><span class="threshold-warn">0.55–0.64</span></td><td><span class="threshold-fail">&lt; 0.55</span></td></tr>
+        <tr><td>Consistency (action set Jaccard)</td><td><span class="threshold-pass">≥ 0.90</span></td><td><span class="threshold-warn">0.80–0.89</span></td><td><span class="threshold-fail">&lt; 0.80</span></td></tr>
+        <tr><td>Customer-outcome lift (pilot data)</td><td><span class="threshold-pass">Stat-sig lift on ≥2 of {open, click, conv, rev/send}</span></td><td><span class="threshold-warn">Stat-sig lift on 1 of 4</span></td><td><span class="threshold-fail">No stat-sig lift</span></td></tr>
+        <tr><td>Action take-rate (pilot)</td><td><span class="threshold-pass">≥ 30%</span></td><td><span class="threshold-warn">15–29%</span></td><td><span class="threshold-fail">&lt; 15%</span></td></tr>
+        <tr><td>VOC defect rate (cumulative)</td><td><span class="threshold-pass">≤ 3% of audits</span></td><td><span class="threshold-warn">3–7%</span></td><td><span class="threshold-fail">&gt; 7%</span></td></tr>
+        <tr><td>Zero serious-impact false negatives</td><td><span class="threshold-pass">0 in pilot</span></td><td>—</td><td><span class="threshold-fail">Any</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>"Serious-impact false negative"</strong> = audit failed to flag a Compliance issue, a Deliverability incident, or a major deliverability/list-health red flag. PRD treats this as a hard guardrail. One occurrence in pilot is a fail.
+    </div>
+
+    <h3>3.3 Per-merge regression gates</h3>
+
+    <p>Continuous-integration thresholds for any code change touching skills, prompts, or retrieval tools.</p>
+
+    <ul>
+      <li><strong>No regression &gt; 2 percentage points</strong> on per-dimension grade accuracy vs. last green build.</li>
+      <li><strong>No regression on consistency</strong> below 0.05 Jaccard delta.</li>
+      <li><strong>Zero new hallucinations</strong> on a held-out 50-case canary set.</li>
+      <li><strong>Aggregator determinism</strong> must remain at 100% (any drop blocks merge).</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="decisions">4. Decision-log protocol</h2>
+
+    <p>Eval results without decisions are exhaust. Every eval run that touches a launch gate produces a decision-log entry. Decision-log is structured, dated, and linked to the eval run that triggered it.</p>
+
+    <h3 id="dec-pass">4.1 Pass paths</h3>
+
+    <p>When all gates are in Pass band:</p>
+    <ul>
+      <li>Decision-log: "Proceed" — name the launch step that's authorized.</li>
+      <li>Capture: which datasets the eval ran on, which thresholds were tested, who signed off.</li>
+      <li>Even on a Pass, log the <em>weakest</em> three metrics — these become next quarter's improvement focus.</li>
+    </ul>
+
+    <h3 id="dec-warn">4.2 Warn paths</h3>
+
+    <p>When ≥1 metric is in Warn but none are in Fail. The decision is not "ship anyway" or "block." It's <strong>"contain blast radius and prove out fast."</strong></p>
+
+    <ul>
+      <li><strong>Required containment moves:</strong>
+        <ul>
+          <li>Reduce pilot cohort size by 50% (e.g. 8 CSMs instead of 16).</li>
+          <li>Add a human-in-the-loop checkpoint: every audit reviewed by AI Science or a senior CSM before sharing with a customer.</li>
+          <li>Increase eval cadence from weekly to twice-weekly during the warn-state period.</li>
+          <li>Set a 4-week reassessment date; if not in Pass by then, reclassify as Fail.</li>
+        </ul>
+      </li>
+      <li><strong>Required decision-log entry:</strong> name the warning metric(s), the hypothesis for cause, the remediation tried, and the date for reassessment.</li>
+      <li><strong>Specific common cases:</strong>
+        <ul>
+          <li><em>Action Jaccard in Warn but grade accuracy in Pass.</em> Likely the action synthesizer is not deduplicating well across dimensions. Targeted fix.</li>
+          <li><em>Citation validity in Warn but hallucination rate in Pass.</em> Likely a structured-output schema issue. Tighten the JSON schema constraint and re-eval before further rollout.</li>
+          <li><em>Consistency in Warn for one dimension only.</em> Likely temperature setting on that skill, or under-specified prompt — prompt-tighten and re-eval.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3 id="dec-fail">4.3 Fail paths</h3>
+
+    <p>When ≥1 metric is in Fail band. <strong>Launch blocked, period.</strong></p>
+
+    <ul>
+      <li><strong>Required moves:</strong>
+        <ul>
+          <li>Pause any active rollout (revert to internal-only).</li>
+          <li>Root-cause within 5 business days; remediation owner named.</li>
+          <li>No incremental rollout while in Fail — re-eval to Pass before any progress.</li>
+          <li>If two consecutive fail-then-fail cycles on the same metric, escalate to leadership for scope review.</li>
+        </ul>
+      </li>
+      <li><strong>Required decision-log entry:</strong> failed metric(s), root-cause hypothesis, remediation plan with named owner and target date, post-fix re-eval plan.</li>
+      <li><strong>Specific common cases:</strong>
+        <ul>
+          <li><em>Hallucination rate &gt; 5%.</em> Almost always retrieval-grounding is loose. Tighten evidence-citation contract; reduce LLM creative latitude on findings; consider a separate grounding pass before generation.</li>
+          <li><em>Worst-dimension accuracy &lt; 60%.</em> Specific dimension prompt or data plane is broken. Isolate the dimension, fix it, re-eval that dimension only first.</li>
+          <li><em>Aggregator non-deterministic.</em> Code bug, not LLM issue. Aggregator must be code, not prompt — fix immediately, this is non-negotiable.</li>
+          <li><em>Serious-impact false negative.</em> Stop everything. Add the failure case to the synthetic-stress set permanently; root-cause why the relevant skill missed it.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3 id="dec-template">4.4 Decision-log entry template</h3>
+
+<pre><code># Decision Log Entry
+Date: 2026-MM-DD
+Trigger: {pre-merge | weekly | quarterly | adhoc}
+Eval run ID: {trace ID}
+
+## Gate evaluated
+{Pilot launch | GA launch | Per-merge regression | …}
+
+## Result
+Pass / Warn / Fail
+
+## Metrics in Warn or Fail (if any)
+| Metric | Value | Threshold | Band |
+|---|---|---|---|
+
+## Decision
+{Proceed | Contain | Block}
+
+## Containment / remediation actions
+- {action 1, owner, due date}
+- {action 2, owner, due date}
+
+## Root-cause hypothesis (if Warn or Fail)
+{1–3 sentences}
+
+## Reassessment date
+YYYY-MM-DD
+
+## Approver(s)
+{names}
+
+## Linked artifacts
+- Eval run: {URL}
+- VOC tickets: {URLs}
+- Code change: {PR URL}
+</code></pre>
+
+    <p>Decision logs live in a single repo / wiki page (one source of truth). Searchable. Used as the audit trail for any "why did we ship this on date X" question down the road. Also the input to quarterly recalibration.</p>
+
+    <hr>
+
+    <h2 id="judge">5. LLM-as-judge: design and use</h2>
+
+    <h3 id="judge-when">5.1 When to use LLM-as-judge (and when not to)</h3>
+
+    <p>LLM-as-judge is right for <em>scale-bound qualitative grading</em> — relevance, faithfulness, root-cause quality, hallucination, action specificity. It's wrong for <em>determinism, exact-match, or numerical correctness</em> — those need code-eval (deterministic checks).</p>
+
+    <table>
+      <thead>
+        <tr><th>Eval type</th><th>Use LLM judge?</th><th>Reason</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hallucination rate</td><td><strong>Yes</strong></td><td>Requires reading the finding + retrieved evidence and judging whether the claim is grounded. Scales beyond human review.</td></tr>
+        <tr><td>Citation validity</td><td>Partial — judge for "does the citation actually support the claim"; code-eval for "does the citation tuple resolve to a real data point"</td><td>Two different checks; different tooling.</td></tr>
+        <tr><td>Action relevance</td><td><strong>Yes, with calibration</strong></td><td>Judge can rate "is this action specific to this account?" against the customer context and dimension findings.</td></tr>
+        <tr><td>Root-cause quality</td><td><strong>Yes, with calibration</strong></td><td>Judge can compare diagnostic chain to expert-equivalent reasoning.</td></tr>
+        <tr><td>Grade accuracy vs. expert</td><td>No — exact-match</td><td>Just compare strings.</td></tr>
+        <tr><td>Aggregator determinism</td><td>No — code-eval</td><td>Byte-identical check.</td></tr>
+        <tr><td>Deep-link surface-load</td><td>No — synthetic click test</td><td>Behavioral, not qualitative.</td></tr>
+        <tr><td>Consistency (rerun similarity)</td><td>No — Jaccard on action sets</td><td>Set arithmetic.</td></tr>
+        <tr><td>Customer-outcome lift</td><td>No — A/B + stat-sig test</td><td>Causal inference, not grading.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="judge-arch">5.2 Architecture</h3>
+
+    <p>Three judges, each with one job. <strong>Specialization beats omniscience</strong> in LLM-as-judge — narrow judges with explicit rubrics outperform a single general-purpose judge.</p>
+
+    <table>
+      <thead>
+        <tr><th>Judge</th><th>Input</th><th>Output</th><th>Used by</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>FaithfulnessJudge</strong></td><td>Finding text + retrieved evidence bundle (citations + raw values from data plane)</td><td>Per-claim verdict: <code>{supported, unsupported, partially-supported}</code> + reason</td><td>Hallucination rate, citation validity</td></tr>
+        <tr><td><strong>RelevanceJudge</strong></td><td>Action card + dimension findings + customer context (vertical, ICP, brand voice)</td><td>4-axis score (1–5): <code>{specificity, executability, leverage, on-brand}</code> + reason</td><td>Action relevance, ROI calibration</td></tr>
+        <tr><td><strong>RootCauseJudge</strong></td><td>Diagnostic chain on a Moderate/Needs-Attention dimension + supporting evidence</td><td>4-pt score on causal-chain coherence + alt-hypothesis flag if a more likely cause is supported by the same evidence</td><td>Root-cause quality</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Why three judges, not one.</strong> A unified judge tends to anchor on the most prominent failure mode (usually hallucination) and under-weight the others. Three narrow judges, each with their own rubric and few-shot calibration set, produce more reliable grades. Costs more compute; worth it for V1 quality posture.</p>
+
+    <p><strong>Judge model selection.</strong> Use a strong model for the judge — <em>stronger than the agent itself if affordable</em>. The judge's whole value is being more rigorous than the system being judged. Use a different model family from the agent (avoids same-family bias). Prefer Claude Opus or equivalent for the judge if the agent runs on a smaller model.</p>
+
+    <h3 id="judge-prompts">5.3 Judge prompt design</h3>
+
+    <p>Four design rules for judge prompts that make them measurably better than generic "rate this on 1–5":</p>
+
+    <ol>
+      <li><strong>Anchored rubric, not abstract scale.</strong> Each score level has a concrete behavioral definition, with a worked example. "5 = action references a specific account-level data point AND names the Mailchimp surface AND has executable steps. 1 = generic advice that could apply to any account."</li>
+      <li><strong>Pairwise comparison when possible.</strong> Judges are more reliable comparing two outputs ("which is more grounded?") than scoring one in isolation. Use pairwise for action quality especially.</li>
+      <li><strong>Mandatory cite-the-evidence.</strong> Judge must quote the specific span of evidence (or specific data tuple) supporting its verdict. No quote → automatically Warn.</li>
+      <li><strong>Explicit "I cannot determine" path.</strong> Same abstain-as-first-class principle as the audit itself. If the judge can't confidently rate, it returns <code>insufficient-evidence</code> — better than a guessed score.</li>
+    </ol>
+
+    <p><strong>Judge prompt template (FaithfulnessJudge — illustrative):</strong></p>
+
+<pre><code>You are an evidence-grounding judge for a Mailchimp campaign-audit agent.
+
+Your job: given a FINDING and the EVIDENCE the agent had access to,
+classify each quantitative or specific claim in the finding.
+
+Categories:
+- supported: the claim is directly entailed by an evidence tuple
+  (you must quote the supporting tuple)
+- partially-supported: the claim is directionally true but the
+  specifics (numbers, time windows, segment names) are not
+  exactly entailed by evidence
+- unsupported: the claim is not present in evidence
+- insufficient-evidence: you cannot determine from what was
+  provided
+
+Output schema (JSON):
+{
+  "claims": [
+    {
+      "text": "<the claim>",
+      "verdict": "supported | partially-supported | unsupported | insufficient-evidence",
+      "supporting_evidence_tuple": "<quoted tuple OR null>",
+      "reason": "<one sentence>"
+    }
+  ]
+}
+
+Be strict. If the finding says "past purchasers convert 3.2x higher"
+but evidence shows the multiplier is 2.8x, that is partially-supported,
+not supported. Numbers matter.
+
+FINDING:
+{finding_text}
+
+EVIDENCE:
+{evidence_bundle}
+</code></pre>
+
+    <p><strong>Determinism for judges.</strong> Run the judge with <code>temperature=0</code> and a fixed seed where supported. Judge variance is its own failure mode; on the calibration set the judge should grade the same finding the same way ≥95% of reruns.</p>
+
+    <h3 id="judge-calibration">5.4 Calibration</h3>
+
+    <p>An LLM judge is only as trustworthy as its calibration. Required calibration steps:</p>
+
+    <ul>
+      <li><strong>Calibration set:</strong> 50 expert-graded findings with known verdicts (mix of supported, partially-supported, unsupported). Quarterly refresh.</li>
+      <li><strong>Calibration metric:</strong> Cohen's κ between judge and expert. <strong>κ ≥ 0.7 is the bar to deploy a judge.</strong> Below that, judge is no better than coin-flip on edge cases.</li>
+      <li><strong>Drift detection:</strong> Daily rerun of a 20-case canary calibration set. Alert on κ drop &gt; 0.05.</li>
+      <li><strong>Adversarial calibration:</strong> Include 5 "trick" cases in calibration — e.g. a finding with a citation that <em>looks</em> right but cites a different period than claimed. Judge must catch these.</li>
+    </ul>
+
+    <p><strong>Don't trust uncalibrated judges.</strong> A well-prompted judge that hasn't been measured against expert ground truth is exactly as reliable as the agent it's grading — which means using it as a gate is circular. Calibration is the only thing that gives judge scores enforceable authority in launch decisions.</p>
+
+    <h3 id="judge-pitfalls">5.5 Pitfalls to avoid</h3>
+
+    <p>Common failure modes when wiring LLM-as-judge into an eval system:</p>
+
+    <ul>
+      <li><strong>Same-model judge.</strong> Judge and agent share weights → judge inherits the agent's blind spots. Use a different model.</li>
+      <li><strong>Length bias.</strong> Generic LLM judges over-reward long, well-formatted outputs. Mitigate with explicit "verbosity is not quality" instruction + length-controlled comparison cases in calibration.</li>
+      <li><strong>Position bias.</strong> In pairwise comparisons, judges anchor on whichever option appears first. Mitigate by running each comparison in both orders and averaging.</li>
+      <li><strong>Confidence-without-grounding.</strong> Judges asked to rate on a 1–5 scale will produce a confident number even with no information. The mandatory-cite-the-evidence rule + explicit "insufficient-evidence" path is what defends against this.</li>
+      <li><strong>Drift after model upgrades.</strong> When the judge model is upgraded, calibration must be redone. A new judge model is a new judge.</li>
+      <li><strong>Using the judge to fix itself.</strong> Don't use the judge's own scores to retrain the agent without an independent human review of the judge's decisions on a sample. Otherwise you optimize for the judge, not for customer outcomes.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="improve">6. Closed-loop improvement: how the eval drives the agent</h2>
+
+    <p>The eval system isn't just a gate; it's the steering wheel for improving the agent. The closed loop has four feedback paths:</p>
+
+    <ol>
+      <li><strong>Hallucination signal → grounding-prompt tightening.</strong> When FaithfulnessJudge κ drops or hallucination rate creeps up, the response is to tighten the structured-output schema (require evidence-tuple before claim) or to add a separate "grounding pass" that asks the agent to extract evidence first, then write the finding citing it. Track whether this fixes the regression in next eval cycle.</li>
+      <li><strong>Action irrelevance → action-synthesizer rewrite.</strong> Low Jaccard vs. expert + low specificity scores = the action synthesizer is generating generic advice. Common fixes: include more customer-context in its prompt, deduplicate aggressively across dimensions, force ranking by leverage not by which dimension surfaced the issue.</li>
+      <li><strong>Inconsistency → temperature / prompt determinism review.</strong> If consistency drops, audit which skill is flaky. Usually a prompt that allows interpretation latitude. Tighten prompt, lower temperature on that skill specifically. Re-eval consistency.</li>
+      <li><strong>VOC-flagged failures → adversarial set growth.</strong> Every customer-flagged "this finding was wrong" gets added to the VOC adversarial set. Pre-merge eval includes the adversarial set; this means each known failure mode is regression-protected forever after.</li>
+    </ol>
+
+    <p><strong>Cadence rule.</strong> Eval results without action are wasted. Every weekly eval review must produce one of: a fix landed, an experiment scoped, or an explicit "we're accepting this for now and here's why" decision-log entry. No item sits in eval-output limbo.</p>
+
+    <hr>
+
+    <h2 id="timeline">Timeline &amp; ownership</h2>
+
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Eval milestone</th><th>Owner</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>T-6 weeks (pre-pilot)</td><td>Datasets defined; golden-CSM set initial 20 audits collected; judge prompts drafted; calibration set constructed</td><td>AI Science + PM + CSM org</td></tr>
+        <tr><td>T-4 weeks</td><td>Eval harness wired up; per-skill thresholds run on dev environment; initial judge calibration (κ ≥ 0.7 confirmed)</td><td>AI Science + Eng</td></tr>
+        <tr><td>T-2 weeks</td><td>Pilot-launch gate eval run; decision-log entry signed off by AI Science + PM + Eng</td><td>PM (decision-log owner)</td></tr>
+        <tr><td>Pilot weeks 1–4</td><td>Daily full-suite + weekly outcome review; VOC adversarial set begins growing; outcome-tracking set begins</td><td>AI Science + PM</td></tr>
+        <tr><td>Pilot weeks 5–8</td><td>Causal lift measurement on pilot cohort; pre-GA gate eval run</td><td>Data Science + AI Science</td></tr>
+        <tr><td>Pre-GA</td><td>GA-launch gate eval run; decision-log entry; quarterly recalibration cycle starts</td><td>PM + AI Science + Eng + Leadership</td></tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <h2 id="summary">Summary (one screen)</h2>
+
+    <ul>
+      <li><strong>Three measurement layers:</strong> per-skill correctness, system-level consistency, customer-outcome lift. Layered, not picked.</li>
+      <li><strong>Five datasets:</strong> golden-CSM, synthetic-stress, replay-consistency, outcome-tracking, VOC-adversarial. Each owned, each refreshed.</li>
+      <li><strong>Seven quality axes:</strong> dimension accuracy, hallucination rate, citation fidelity, root-cause quality, action relevance, ROI calibration, consistency.</li>
+      <li><strong>Two-tier thresholds:</strong> pilot-launch (CSM/AM Briefing) and GA-launch (in-product). Pass/Warn/Fail bands with explicit decisions for each.</li>
+      <li><strong>Decision-log discipline:</strong> every gate produces a structured decision-log entry. Warn = contain blast radius. Fail = block + named remediation owner.</li>
+      <li><strong>Three LLM judges, calibrated to κ ≥ 0.7:</strong> FaithfulnessJudge, RelevanceJudge, RootCauseJudge. Anchored rubrics, mandatory evidence-citation, explicit abstain path.</li>
+      <li><strong>Closed-loop improvement:</strong> eval signals route to specific remediation paths. VOC failures become regression cases. Every weekly review produces an action.</li>
+      <li><strong>The single most important property:</strong> <em>quality is measurable, not asserted.</em> The PRD's "trust at scale requires measurable quality" line is what this whole document operationalizes.</li>
+    </ul>
+
+    <div class="footer-meta">
+      Companion to the architecture doc · Mailchimp R&amp;A · AI Campaign Health Intelligence
+    </div>
+  </main>
+</div>
+</body>
+</html>
